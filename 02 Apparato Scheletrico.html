@@ -1,0 +1,601 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mappa Mentale - Anatomia Generale: Sistema Scheletrico e Articolare</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+
+        .container {
+            width: 100%;
+            height: 90vh;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        .mind-map {
+            position: relative;
+            width: 900px;
+            height: 900px;
+            margin: 0 auto;
+        }
+
+
+        .central-node {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+
+        .central-node:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 18px 45px rgba(0,0,0,0.4);
+        }
+
+
+        .main-branch {
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+
+        .main-branch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+
+
+        .sub-branch {
+            position: absolute;
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            font-size: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: scale(0);
+        }
+
+
+        .sub-branch.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+
+        .sub-branch:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+
+        .connection-line {
+            position: absolute;
+            background: rgba(255,255,255,0.3);
+            transform-origin: left center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+
+        .connection-line.active {
+            opacity: 1;
+        }
+
+
+        /* Colori per le diverse sezioni */
+        .apparato-scheletrico { background: linear-gradient(45deg, #3498db, #2980b9); }
+        .struttura-osso { background: linear-gradient(45deg, #27ae60, #229954); }
+        .classificazioni-ossa { background: linear-gradient(45deg, #f39c12, #e67e22); }
+        .midollo-osseo { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+        .vascolarizzazione { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
+        .periostio { background: linear-gradient(45deg, #1abc9c, #16a085); }
+        .articolazioni { background: linear-gradient(45deg, #34495e, #2c3e50); }
+        .classificazione-articolazioni { background: linear-gradient(45deg, #e67e22, #d35400); }
+        .articolazioni-contiguita { background: linear-gradient(45deg, #8e44ad, #7d3c98); }
+        .posizione-anatomica { background: linear-gradient(45deg, #2ecc71, #27ae60); }
+        .piani-assi { background: linear-gradient(45deg, #f1c40f, #f39c12); }
+        .repere { background: linear-gradient(45deg, #95a5a6, #7f8c8d); }
+
+
+        .info-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 350px;
+            max-height: 75vh;
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+
+        .info-panel.active {
+            transform: translateX(0);
+        }
+
+
+        .info-panel h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+
+        .info-panel ul {
+            list-style: none;
+            padding: 0;
+        }
+
+
+        .info-panel li {
+            margin: 8px 0;
+            padding: 10px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+
+        .info-panel .highlight {
+            background: rgba(231, 76, 60, 0.1);
+            border-left: 3px solid #e74c3c;
+        }
+
+
+        .close-panel {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+
+        .close-panel:hover {
+            color: #2c3e50;
+        }
+
+
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            max-width: 300px;
+        }
+
+
+        .instructions h4 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+
+        .instructions p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #34495e;
+        }
+
+
+        .professor-info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+
+        @media (max-width: 768px) {
+            .mind-map {
+                width: 700px;
+                height: 700px;
+            }
+            
+            .central-node {
+                width: 170px;
+                height: 170px;
+                font-size: 14px;
+            }
+            
+            .main-branch {
+                width: 100px;
+                height: 100px;
+                font-size: 10px;
+            }
+            
+            .sub-branch {
+                width: 60px;
+                height: 60px;
+                font-size: 8px;
+            }
+            
+            .info-panel {
+                width: 90vw;
+                right: 5vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="professor-info">
+        <strong>Prof.ssa Simona Mrakic Sposta</strong><br>
+        Anatomia Generale
+    </div>
+
+
+    <div class="container">
+        <div class="mind-map" id="mindMap">
+            <div class="central-node" onclick="toggleAll()">
+                ANATOMIA<br>GENERALE<br>
+                <small>Sistema Scheletrico<br>e Articolare</small>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="info-panel" id="infoPanel">
+        <button class="close-panel" onclick="closeInfo()">×</button>
+        <h3 id="infoTitle">Seleziona un argomento</h3>
+        <div id="infoContent">
+            <p>Clicca su un nodo per visualizzare i dettagli del corso di Anatomia Generale</p>
+        </div>
+    </div>
+
+
+    <div class="instructions">
+        <h4>Navigazione:</h4>
+        <p>• Clicca sui nodi principali per espandere</p>
+        <p>• Clicca sui sotto-nodi per i dettagli</p>
+        <p>• Clicca al centro per mostrare tutto</p>
+        <p>• Pannello info a destra per approfondimenti</p>
+    </div>
+
+
+    <script>
+        const mindMapData = {
+            "Apparato Scheletrico": {
+                color: "apparato-scheletrico",
+                items: [
+                    "Funzioni: Protezione, Sostegno, Contributo al movimento",
+                    "Funzioni: Riserva minerali, Emopoiesi", 
+                    "Componenti: Scheletro appendicolare e assile",
+                    "Caratteristiche: ~20% peso corporeo, ~200 ossa nell'adulto"
+                ]
+            },
+            "Struttura Osso": {
+                color: "struttura-osso",
+                items: [
+                    "Matrice extracellulare: molto dura, compatta e mineralizzata",
+                    "Componente cellulare: abbondanza di osteociti",
+                    "Tessuto Osseo Spugnoso: rete di lamine e trabecole",
+                    "Tessuto Osseo Compatto: denso, solido, densamente calcificato"
+                ]
+            },
+            "Classificazioni Ossa": {
+                color: "classificazioni-ossa",
+                items: [
+                    "Ossa lunghe: si sviluppano in lunghezza (radio, ulna, omero)",
+                    "Ossa corte: forma cuboidale (carpo/tarso)",
+                    "Ossa piatte: lunghezza e larghezza > spessore (scapole, sterno)",
+                    "Ossa irregolari: vertebre",
+                    "Ossa sesamoidi: patella, osso pisiforme"
+                ]
+            },
+            "Midollo Osseo": {
+                color: "midollo-osseo",
+                items: [
+                    "Tessuto molle nei canali delle ossa lunghe",
+                    "Fascia centrale delle ossa piatte",
+                    "Midollo giallo: stroma (adipociti)",
+                    "Midollo rosso: parenchima emopoietico, cellule staminali"
+                ]
+            },
+            "Vascolarizzazione": {
+                color: "vascolarizzazione",
+                items: [
+                    "Riccamente vascolarizzato e innervato",
+                    "Arterie nutritizie: prima fonte di irrorazione",
+                    "Arterie periostee: seconda fonte di irrorazione",
+                    "Vascolarizzazione diafisaria e metaepifisaria anastomizzate"
+                ]
+            },
+            "Periostio": {
+                color: "periostio",
+                items: [
+                    "Riveste le superfici esterne dell'osso",
+                    "Spessa capsula connettivale",
+                    "Tessuto connettivo denso a fibre intrecciate",
+                    "Funzioni: Protegge l'osso, supporta azione trofica"
+                ]
+            },
+            "Articolazioni": {
+                color: "articolazioni",
+                items: [
+                    "Funzioni: Rendono le ossa solidali",
+                    "Consentono movimento reciproco delle ossa contigue",
+                    "Permettono movimento dei segmenti scheletrici",
+                    "Classificazione basata sulla mobilità"
+                ]
+            },
+            "Classificazione Articolazioni": {
+                color: "classificazione-articolazioni",
+                items: [
+                    "Tipo mobile: articolazione della spalla",
+                    "Semimobile: fra le vertebre",
+                    "Fisso: ossa del cranio",
+                    "Basata sul grado di mobilità"
+                ]
+            },
+            "Articolazioni per Contiguità": {
+                color: "articolazioni-contiguita",
+                items: [
+                    "Artrodia: superfici pianeggianti, movimenti di scivolamento",
+                    "Enartrosi: capi sferici, movimenti angolari su tutti i piani",
+                    "Condiloartrosi: superfici ellissoidali, movimento su due piani",
+                    "Articolazioni a Sella: biassiali concave-convesse",
+                    "Ginglimo Angolare: forma cilindrica, movimento in un piano",
+                    "Ginglimo Laterale: movimento rotatorio"
+                ]
+            },
+            "Posizione Anatomica": {
+                color: "posizione-anatomica",
+                items: [
+                    "Stazione eretta, viso in avanti",
+                    "Arti paralleli all'asse del corpo",
+                    "Palmi delle mani rivolti in avanti",
+                    "Termini: Craniale/Caudale, Mediale/Laterale",
+                    "Termini: Ventrale/Dorsale, Prossimale/Distale"
+                ]
+            },
+            "Piani ed Assi": {
+                color: "piani-assi",
+                items: [
+                    "Piani Sagittali: laterali o mediale",
+                    "Piani Frontali: separano ventrale da dorsale",
+                    "Piani Trasversali: dividono craniale da caudale",
+                    "Superfici: anteriore/posteriore, laterali dx/sx"
+                ]
+            },
+            "Punti di Repere": {
+                color: "repere",
+                items: [
+                    "Definizione: trovare posizioni di punti ed aree",
+                    "Parti dello scheletro apprezzabili superficialmente",
+                    "Processo trasverso atlante",
+                    "Processo spinoso VII cervicale",
+                    "Prima costa"
+                ]
+            }
+        };
+
+
+        let currentActive = new Set();
+        let allExpanded = false;
+
+
+        function createMindMap() {
+            const mindMap = document.getElementById('mindMap');
+            const keys = Object.keys(mindMapData);
+            const centerX = 450;
+            const centerY = 450;
+            const radius = 320;
+
+
+            keys.forEach((key, index) => {
+                const angle = (index * 2 * Math.PI) / keys.length;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+
+                // Crea nodo principale
+                const mainNode = document.createElement('div');
+                mainNode.className = `main-branch ${mindMapData[key].color}`;
+                mainNode.style.left = `${x - 65}px`;
+                mainNode.style.top = `${y - 65}px`;
+                mainNode.textContent = key;
+                mainNode.onclick = () => toggleBranch(key, x, y);
+                mindMap.appendChild(mainNode);
+
+
+                // Crea linea di connessione
+                const line = document.createElement('div');
+                line.className = 'connection-line';
+                line.style.left = `${centerX}px`;
+                line.style.top = `${centerY}px`;
+                line.style.width = `${Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2) - 110}px`;
+                line.style.height = '2px';
+                line.style.transform = `rotate(${Math.atan2(y - centerY, x - centerX)}rad)`;
+                mindMap.appendChild(line);
+
+
+                // Crea sotto-nodi
+                createSubNodes(key, x, y, mindMap);
+            });
+        }
+
+
+        function createSubNodes(parentKey, parentX, parentY, container) {
+            const items = mindMapData[parentKey].items;
+            const subRadius = 130;
+            
+            items.forEach((item, index) => {
+                const angle = (index * 2 * Math.PI) / items.length;
+                const x = parentX + subRadius * Math.cos(angle);
+                const y = parentY + subRadius * Math.sin(angle);
+
+
+                const subNode = document.createElement('div');
+                subNode.className = `sub-branch ${mindMapData[parentKey].color}`;
+                subNode.style.left = `${x - 37.5}px`;
+                subNode.style.top = `${y - 37.5}px`;
+                
+                // Estrai la prima parte del testo per il nodo
+                const shortText = item.split(':')[0].substring(0, 15) + (item.length > 15 ? '...' : '');
+                subNode.textContent = shortText;
+                subNode.onclick = () => showInfo(parentKey, item);
+                subNode.dataset.parent = parentKey;
+                container.appendChild(subNode);
+
+
+                // Linea di connessione per sotto-nodi
+                const subLine = document.createElement('div');
+                subLine.className = 'connection-line';
+                subLine.style.left = `${parentX}px`;
+                subLine.style.top = `${parentY}px`;
+                subLine.style.width = `${Math.sqrt((x - parentX) ** 2 + (y - parentY) ** 2) - 65}px`;
+                subLine.style.height = '1px';
+                subLine.style.transform = `rotate(${Math.atan2(y - parentY, x - parentX)}rad)`;
+                subLine.dataset.parent = parentKey;
+                container.appendChild(subLine);
+            });
+        }
+
+
+        function toggleBranch(branchName, x, y) {
+            const subNodes = document.querySelectorAll(`[data-parent="${branchName}"]`);
+            const isActive = currentActive.has(branchName);
+
+
+            if (isActive) {
+                currentActive.delete(branchName);
+                subNodes.forEach(node => {
+                    node.classList.remove('active');
+                });
+            } else {
+                currentActive.add(branchName);
+                subNodes.forEach(node => {
+                    node.classList.add('active');
+                });
+            }
+        }
+
+
+        function toggleAll() {
+            allExpanded = !allExpanded;
+            const allSubNodes = document.querySelectorAll('.sub-branch, .connection-line[data-parent]');
+            
+            if (allExpanded) {
+                currentActive = new Set(Object.keys(mindMapData));
+                allSubNodes.forEach(node => {
+                    node.classList.add('active');
+                });
+            } else {
+                currentActive.clear();
+                allSubNodes.forEach(node => {
+                    node.classList.remove('active');
+                });
+            }
+        }
+
+
+        function showInfo(category, item) {
+            const infoPanel = document.getElementById('infoPanel');
+            const infoTitle = document.getElementById('infoTitle');
+            const infoContent = document.getElementById('infoContent');
+
+
+            infoTitle.textContent = category;
+            
+            if (item) {
+                infoContent.innerHTML = `
+                    <h4>Dettaglio selezionato:</h4>
+                    <div class="highlight"><strong>${item}</strong></div>
+                    <h4>Tutti gli elementi di "${category}":</h4>
+                    <ul>
+                        ${mindMapData[category].items.map(i => `<li>${i}</li>`).join('')}
+                    </ul>
+                `;
+            } else {
+                infoContent.innerHTML = `
+                    <ul>
+                        ${mindMapData[category].items.map(i => `<li>${i}</li>`).join('')}
+                    </ul>
+                `;
+            }
+
+
+            infoPanel.classList.add('active');
+        }
+
+
+        function closeInfo() {
+            document.getElementById('infoPanel').classList.remove('active');
+        }
+
+
+        // Inizializza la mappa mentale
+        createMindMap();
+    </script>
+</body>
+</html>

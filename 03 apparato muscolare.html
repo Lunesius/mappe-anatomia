@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mappa Mentale - Apparato Muscolare</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+        .container {
+            width: 100%;
+            height: 90vh;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mind-map {
+            position: relative;
+            width: 800px;
+            height: 800px;
+            margin: 0 auto;
+        }
+
+        .central-node {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .central-node:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .main-branch {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .main-branch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+
+        .sub-branch {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            font-size: 11px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .sub-branch.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .sub-branch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .connection-line {
+            position: absolute;
+            background: rgba(255,255,255,0.3);
+            transform-origin: left center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .connection-line.active {
+            opacity: 1;
+        }
+
+        /* Colori per le diverse sezioni */
+        .definizione { background: linear-gradient(45deg, #4ECDC4, #44A08D); }
+        .funzioni { background: linear-gradient(45deg, #FFD93D, #FF6B6B); }
+        .capacita { background: linear-gradient(45deg, #6BCF7F, #4D9A6A); }
+        .tipi { background: linear-gradient(45deg, #A8E6CF, #7FB069); }
+        .classificazione { background: linear-gradient(45deg, #FF8A95, #FF677D); }
+        .contrazione { background: linear-gradient(45deg, #B8A9C9, #9A8AC1); }
+        .leva { background: linear-gradient(45deg, #FFD3A5, #FD9853); }
+        .cellula { background: linear-gradient(45deg, #A8DADC, #81C3D7); }
+
+        .info-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            max-height: 70vh;
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .info-panel.active {
+            transform: translateX(0);
+        }
+
+        .info-panel h3 {
+            color: #333;
+            margin-top: 0;
+            border-bottom: 2px solid #FF6B6B;
+            padding-bottom: 10px;
+        }
+
+        .info-panel ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-panel li {
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255,107,107,0.1);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .close-panel {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            max-width: 300px;
+        }
+
+        .instructions h4 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .mind-map {
+                width: 600px;
+                height: 600px;
+            }
+            
+            .central-node {
+                width: 150px;
+                height: 150px;
+                font-size: 16px;
+            }
+            
+            .main-branch {
+                width: 100px;
+                height: 100px;
+                font-size: 12px;
+            }
+            
+            .sub-branch {
+                width: 60px;
+                height: 60px;
+                font-size: 9px;
+            }
+            
+            .info-panel {
+                width: 90vw;
+                right: 5vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="mind-map" id="mindMap">
+            <div class="central-node" onclick="toggleAll()">
+                APPARATO<br>MUSCOLARE
+            </div>
+        </div>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+        <button class="close-panel" onclick="closeInfo()">×</button>
+        <h3 id="infoTitle">Seleziona un argomento</h3>
+        <div id="infoContent">
+            <p>Clicca su un nodo per visualizzare i dettagli</p>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h4>Istruzioni:</h4>
+        <p>• Clicca sui nodi principali per espandere</p>
+        <p>• Clicca sui sotto-nodi per dettagli</p>
+        <p>• Clicca al centro per mostrare tutto</p>
+    </div>
+
+    <script>
+        const mindMapData = {
+            "Definizione e Componenti": {
+                color: "definizione",
+                items: [
+                    "Sistema Scheletrico: ossa che si uniscono a formare lo scheletro",
+                    "Sistema Articolare: articolazioni che mettono in giunzione le ossa",
+                    "Sistema Muscolare: muscolatura scheletrica",
+                    "Muscolo: tessuto composto da fibre muscolari dotate di capacità contrattile"
+                ]
+            },
+            "Funzioni dei Muscoli": {
+                color: "funzioni",
+                items: [
+                    "Movimento dello scheletro",
+                    "Postura dell'organismo",
+                    "Sostegno a parti molli",
+                    "Protettiva",
+                    "Funzionamento di orifizi"
+                ]
+            },
+            "Capacità del Muscolo": {
+                color: "capacita",
+                items: [
+                    "Contrattilità: capacità di accorciarsi/allungarsi",
+                    "Eccitabilità: capacità di rispondere a stimoli nervosi e/o ormonali",
+                    "Estensibilità: capacità di essere stirati fino alla loro lunghezza a riposo",
+                    "Elasticità: capacità di ritornare alla lunghezza iniziale dopo fase di stiramento"
+                ]
+            },
+            "Tipi di Muscoli": {
+                color: "tipi",
+                items: [
+                    "Muscolatura Striata (rossa o volontaria): regolata dalla volontà del soggetto",
+                    "Muscolatura Liscia (bianca o involontaria): attività contrattile autonoma",
+                    "Muscolo Cardiaco (miocardio): caratteristiche istologiche simili ai volontari, ma involontario"
+                ]
+            },
+            "Classificazione": {
+                color: "classificazione",
+                items: [
+                    "Per forma: Monocipiti, Bicipiti, Tricipiti, Quadricipiti",
+                    "Per attacco: Scheletrici, Pellicciai",
+                    "Per dimensioni: Lunghi, Larghi, Brevi",
+                    "Per pennazione: Unipennati, Bipennati, Multipennati",
+                    "Per inserzione: Monocaudati, Bicaudati, Tricaudati"
+                ]
+            },
+            "Contrazione": {
+                color: "contrazione",
+                items: [
+                    "Il muscolo esercita una forza dipendente dal numero delle sue fibre",
+                    "Lavoro muscolare: prodotto del peso per lo spostamento",
+                    "Tipi: Concentrica, Eccentrica, Isometrica"
+                ]
+            },
+            "Leva Muscolare": {
+                color: "leva",
+                items: [
+                    "Definizione: struttura rigida che si muove facendo perno su un punto fisso",
+                    "Fulcro (Articolazione): punto attorno a cui ruota una leva",
+                    "Braccio della Forza: parte tra fulcro e punto di applicazione della forza",
+                    "Classi: 1° Genere, 3° Genere (sempre svantaggiosa)"
+                ]
+            },
+            "Cellula Muscolare": {
+                color: "cellula",
+                items: [
+                    "Fusiforme",
+                    "Si accorcia in seguito a stimolo",
+                    "Citoplasma = Sarcoplasma",
+                    "Miofibrille (actina-miosina)"
+                ]
+            }
+        };
+
+        let currentActive = new Set();
+        let allExpanded = false;
+
+        function createMindMap() {
+            const mindMap = document.getElementById('mindMap');
+            const keys = Object.keys(mindMapData);
+            const centerX = 400;
+            const centerY = 400;
+            const radius = 280;
+
+            keys.forEach((key, index) => {
+                const angle = (index * 2 * Math.PI) / keys.length;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+                // Crea nodo principale
+                const mainNode = document.createElement('div');
+                mainNode.className = `main-branch ${mindMapData[key].color}`;
+                mainNode.style.left = `${x - 70}px`;
+                mainNode.style.top = `${y - 70}px`;
+                mainNode.textContent = key;
+                mainNode.onclick = () => toggleBranch(key, x, y);
+                mindMap.appendChild(mainNode);
+
+                // Crea linea di connessione
+                const line = document.createElement('div');
+                line.className = 'connection-line';
+                line.style.left = `${centerX}px`;
+                line.style.top = `${centerY}px`;
+                line.style.width = `${Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2) - 100}px`;
+                line.style.height = '2px';
+                line.style.transform = `rotate(${Math.atan2(y - centerY, x - centerX)}rad)`;
+                mindMap.appendChild(line);
+
+                // Crea sotto-nodi
+                createSubNodes(key, x, y, mindMap);
+            });
+        }
+
+        function createSubNodes(parentKey, parentX, parentY, container) {
+            const items = mindMapData[parentKey].items;
+            const subRadius = 120;
+            
+            items.forEach((item, index) => {
+                const angle = (index * 2 * Math.PI) / items.length;
+                const x = parentX + subRadius * Math.cos(angle);
+                const y = parentY + subRadius * Math.sin(angle);
+
+                const subNode = document.createElement('div');
+                subNode.className = `sub-branch ${mindMapData[parentKey].color}`;
+                subNode.style.left = `${x - 40}px`;
+                subNode.style.top = `${y - 40}px`;
+                subNode.textContent = item.split(':')[0];
+                subNode.onclick = () => showInfo(parentKey, item);
+                subNode.dataset.parent = parentKey;
+                container.appendChild(subNode);
+
+                // Linea di connessione per sotto-nodi
+                const subLine = document.createElement('div');
+                subLine.className = 'connection-line';
+                subLine.style.left = `${parentX}px`;
+                subLine.style.top = `${parentY}px`;
+                subLine.style.width = `${Math.sqrt((x - parentX) ** 2 + (y - parentY) ** 2) - 70}px`;
+                subLine.style.height = '1px';
+                subLine.style.transform = `rotate(${Math.atan2(y - parentY, x - parentX)}rad)`;
+                subLine.dataset.parent = parentKey;
+                container.appendChild(subLine);
+            });
+        }
+
+        function toggleBranch(branchName, x, y) {
+            const subNodes = document.querySelectorAll(`[data-parent="${branchName}"]`);
+            const isActive = currentActive.has(branchName);
+
+            if (isActive) {
+                currentActive.delete(branchName);
+                subNodes.forEach(node => {
+                    node.classList.remove('active');
+                });
+            } else {
+                currentActive.add(branchName);
+                subNodes.forEach(node => {
+                    node.classList.add('active');
+                });
+            }
+        }
+
+        function toggleAll() {
+            allExpanded = !allExpanded;
+            const allSubNodes = document.querySelectorAll('.sub-branch, .connection-line[data-parent]');
+            
+            if (allExpanded) {
+                currentActive = new Set(Object.keys(mindMapData));
+                allSubNodes.forEach(node => {
+                    node.classList.add('active');
+                });
+            } else {
+                currentActive.clear();
+                allSubNodes.forEach(node => {
+                    node.classList.remove('active');
+                });
+            }
+        }
+
+        function showInfo(category, item) {
+            const infoPanel = document.getElementById('infoPanel');
+            const infoTitle = document.getElementById('infoTitle');
+            const infoContent = document.getElementById('infoContent');
+
+            infoTitle.textContent = category;
+            
+            if (item) {
+                infoContent.innerHTML = `
+                    <h4>Dettaglio selezionato:</h4>
+                    <p><strong>${item}</strong></p>
+                    <h4>Tutti gli elementi di "${category}":</h4>
+                    <ul>
+                        ${mindMapData[category].items.map(i => `<li>${i}</li>`).join('')}
+                    </ul>
+                `;
+            } else {
+                infoContent.innerHTML = `
+                    <ul>
+                        ${mindMapData[category].items.map(i => `<li>${i}</li>`).join('')}
+                    </ul>
+                `;
+            }
+
+            infoPanel.classList.add('active');
+        }
+
+        function closeInfo() {
+            document.getElementById('infoPanel').classList.remove('active');
+        }
+
+        // Inizializza la mappa mentale
+        createMindMap();
+    </script>
+</body>
+</html>
